@@ -8,6 +8,7 @@ namespace Client
 {
     public class PlayerController : MonoBehaviour
     {
+        private AnimatorStateInfo _animatorStateInfo;
         [FormerlySerializedAs("Animator")] public Animator animator;
 
         [FormerlySerializedAs("SpriteRenderer")]
@@ -33,7 +34,14 @@ namespace Client
         private bool _isRolling = false; // 是否正在Roll
 
         private Direction _direction = Direction.Right;
-        private static readonly int Attack1 = Animator.StringToHash("Attack1");
+
+        private int attackCount = 0;
+        private static readonly int AttackCount = Animator.StringToHash("AttackCount");
+
+        private void Start()
+        {
+            _animatorStateInfo = animator.GetCurrentAnimatorStateInfo(0);
+        }
 
         private void FixedUpdate()
         {
@@ -52,6 +60,7 @@ namespace Client
 
         private void Update()
         {
+            _animatorStateInfo = animator.GetCurrentAnimatorStateInfo(0);
             PunchCombo();
         }
 
@@ -65,7 +74,7 @@ namespace Client
             {
                 isGrounded = false;
             }
-            
+
             if (!isGrounded)
             {
                 transform.Translate(Vector3.down * (fallSpeed * Time.deltaTime));
@@ -114,10 +123,44 @@ namespace Client
 
         private void PunchCombo()
         {
+            if ((_animatorStateInfo.IsName("Punch01") || _animatorStateInfo.IsName("Punch02") ||
+                 _animatorStateInfo.IsName("Punch03")) && _animatorStateInfo.normalizedTime > 1.0f)
+            {
+                attackCount = 0; //将hitCount重置为0，即Idle状态
+                animator.SetInteger(AttackCount, attackCount);
+            }
+            
+            Debug.Log($"Is Punch01: {_animatorStateInfo.IsName("Punch01")}");
+            Debug.Log($"Is Punch02: {_animatorStateInfo.IsName("Punch02")}");
+            Debug.Log($"Is Punch03: {_animatorStateInfo.IsName("Punch03")}");
+
             if (Input.GetMouseButtonDown(0))
             {
-                animator.SetTrigger(Attack1);
+                //若处于Idle状态，则直接打断并过渡到attack_a(攻击阶段一)
+                if (_animatorStateInfo.IsName("Idle") && attackCount == 0)
+                {
+                    attackCount = 1;
+                    animator.SetInteger(AttackCount, attackCount);
+                }
+                //如果当前动画处于attack_a(攻击阶段一)并且该动画播放进度小于80%，此时按下攻击键可过渡到攻击阶段二
+                else if (_animatorStateInfo.IsName("Punch01") && attackCount == 1 && _animatorStateInfo.normalizedTime < 0.8f)
+                {
+                    attackCount = 2;
+                }
+                //同上
+                else if (_animatorStateInfo.IsName("Punch02") && attackCount == 2 && _animatorStateInfo.normalizedTime < 0.8f)
+                {
+                    Debug.Log("Change");
+                    attackCount = 3;
+                    //animator.SetInteger(AttackCount, attackCount);
+                }
             }
+        }
+        
+        void GoToNextAttackAction()
+        {
+            Debug.Log($"Attack Count: {attackCount}");
+            animator.SetInteger(AttackCount, attackCount);
         }
     }
 }
