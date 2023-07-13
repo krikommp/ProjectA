@@ -22,6 +22,7 @@ namespace Client
         override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
             animator.SetFloat(targetParameter, 0);
+            Client.Event.OnAttackAnimationEnded.Invoke();
         }
     }
 }

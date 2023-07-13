@@ -19,7 +19,6 @@ namespace Client
         [FormerlySerializedAs("RollDuration")] public float rollDuration = 0.5f;
 
         [FormerlySerializedAs("FallSpeed")] public float fallSpeed = 5f;
-
         private bool isGrounded = false;
         public Transform groundCheck;
         public float groundDistance = 0.1f;
@@ -35,12 +34,15 @@ namespace Client
 
         private Direction _direction = Direction.Right;
 
+        [FormerlySerializedAs("AttackMoveSpeed")] public float attackMoveSpeed = 1;
+        private bool bWaitAttack = false;
+        private bool bAttack = false;
         private int attackCount = 0;
         private static readonly int AttackCount = Animator.StringToHash("AttackCount");
 
         private void Start()
         {
-            _animatorStateInfo = animator.GetCurrentAnimatorStateInfo(0);
+            Event.OnAttackAnimationEnded += OnFinish;
         }
 
         private void FixedUpdate()
@@ -49,19 +51,25 @@ namespace Client
             if (!_isRolling)
             {
                 float horizontal = Input.GetAxis("Horizontal");
-                Move(horizontal);
-                StartRoll();
+                if (bAttack)
+                {
+                    Move(horizontal, attackMoveSpeed);
+                }
+                else
+                {
+                  
+                    Move(horizontal, moveSpeed);
+                }
+
             }
-            else
-            {
-                EndRoll();
-            }
+            EndRoll();
         }
 
         private void Update()
         {
             _animatorStateInfo = animator.GetCurrentAnimatorStateInfo(0);
             PunchCombo();
+            StartRoll();
         }
 
         private void CheckGround()
@@ -81,10 +89,10 @@ namespace Client
             }
         }
 
-        private void Move(float move)
+        private void Move(float move, float speed)
         {
             animator.SetFloat(Horizontal, Mathf.Abs(move));
-            transform.position += new Vector3(move * moveSpeed * Time.deltaTime, 0, 0);
+            transform.position += new Vector3(move * speed * Time.deltaTime, 0, 0);
             if (move != 0.0f)
             {
                 _direction = (move > 0) ? Direction.Right : Direction.Left;
@@ -123,17 +131,6 @@ namespace Client
 
         private void PunchCombo()
         {
-            if ((_animatorStateInfo.IsName("Punch01") || _animatorStateInfo.IsName("Punch02") ||
-                 _animatorStateInfo.IsName("Punch03")) && _animatorStateInfo.normalizedTime > 1.0f)
-            {
-                attackCount = 0; //将hitCount重置为0，即Idle状态
-                animator.SetInteger(AttackCount, attackCount);
-            }
-            
-            Debug.Log($"Is Punch01: {_animatorStateInfo.IsName("Punch01")}");
-            Debug.Log($"Is Punch02: {_animatorStateInfo.IsName("Punch02")}");
-            Debug.Log($"Is Punch03: {_animatorStateInfo.IsName("Punch03")}");
-
             if (Input.GetMouseButtonDown(0))
             {
                 //若处于Idle状态，则直接打断并过渡到attack_a(攻击阶段一)
@@ -141,26 +138,48 @@ namespace Client
                 {
                     attackCount = 1;
                     animator.SetInteger(AttackCount, attackCount);
+                    bAttack = true;
+                }
+                else if (_animatorStateInfo.IsName("Run") && attackCount == 0)
+                {
+                    attackCount = 1;
+                    animator.SetInteger(AttackCount, attackCount);
+                    bAttack = true;
                 }
                 //如果当前动画处于attack_a(攻击阶段一)并且该动画播放进度小于80%，此时按下攻击键可过渡到攻击阶段二
-                else if (_animatorStateInfo.IsName("Punch01") && attackCount == 1 && _animatorStateInfo.normalizedTime < 0.8f)
+                else if (_animatorStateInfo.IsName("Punch01") && attackCount == 1 &&
+                         _animatorStateInfo.normalizedTime < 0.8f)
                 {
                     attackCount = 2;
+                    bWaitAttack = true;
                 }
                 //同上
-                else if (_animatorStateInfo.IsName("Punch02") && attackCount == 2 && _animatorStateInfo.normalizedTime < 0.8f)
+                else if (_animatorStateInfo.IsName("Punch02") && attackCount == 2 &&
+                         _animatorStateInfo.normalizedTime < 0.8f)
                 {
-                    Debug.Log("Change");
                     attackCount = 3;
-                    //animator.SetInteger(AttackCount, attackCount);
+                    bWaitAttack = true;
                 }
             }
         }
-        
+
         void GoToNextAttackAction()
         {
-            Debug.Log($"Attack Count: {attackCount}");
             animator.SetInteger(AttackCount, attackCount);
+        }
+
+        void OnFinish()
+        {
+            if (bWaitAttack)
+            {
+                bWaitAttack = false;
+            }
+            else
+            {
+                attackCount = 0; //将hitCount重置为0，即Idle状态
+                animator.SetInteger(AttackCount, attackCount);
+                bAttack = false;
+            }
         }
     }
 }
