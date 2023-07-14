@@ -43,6 +43,7 @@ namespace Client
         private void Start()
         {
             Event.OnAttackAnimationEnded += OnFinish;
+            Event.OnReceiverHarm += OnReceiveHarm;
         }
 
         private void FixedUpdate()
@@ -180,6 +181,17 @@ namespace Client
                 animator.SetInteger(AttackCount, attackCount);
                 bAttack = false;
             }
+        }
+
+        void OnReceiveHarm(GameObject receiver, GameObject sender)
+        {
+            Debug.Log($"receiver: {receiver.name}, sender: {sender.name}");
+            if (receiver != gameObject)
+                return;
+            // var position = transform.position;
+            // Vector2 direction = new Vector2((position - sender.transform.position).x, position.y);
+            // direction = direction.normalized;
+            transform.Translate((Vector3.left) * 1f);
         }
     }
 }
