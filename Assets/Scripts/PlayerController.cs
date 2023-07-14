@@ -34,41 +34,68 @@ namespace Client
 
         private Direction _direction = Direction.Right;
 
-        [FormerlySerializedAs("AttackMoveSpeed")] public float attackMoveSpeed = 1;
+        [FormerlySerializedAs("AttackMoveSpeed")]
+        public float attackMoveSpeed = 1;
+
+        private float currentAttackMoveSpeed = 0;
+
         private bool bWaitAttack = false;
         private bool bAttack = false;
         private int attackCount = 0;
         private static readonly int AttackCount = Animator.StringToHash("AttackCount");
 
+        [FormerlySerializedAs("JumpSpeed")] public float jumpSpeed;
+        private float lastYPos = float.MaxValue;
+        private float currentYPos;
+        private float verticalSpeed;
+        private bool bJumping = false;
+        private static readonly int VerticalFlag = Animator.StringToHash("VerticalFlag");
+        private static readonly int knockback = Animator.StringToHash("Knockback");
+
+        private bool bKnockback = false;
+
         private void Start()
         {
+            Event.OnReceiverDamage += OnReceiveDamage;
             Event.OnAttackAnimationEnded += OnFinish;
             Event.OnReceiverHarm += OnReceiveHarm;
         }
 
         private void FixedUpdate()
         {
-            CheckGround();
-            if (!_isRolling)
+            Falling();
+            CheckVertical();
+            if (!_isRolling && !bKnockback)
             {
                 float horizontal = Input.GetAxis("Horizontal");
+
+                if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.D))
+                {
+                    currentAttackMoveSpeed = attackMoveSpeed;
+                }
+
                 if (bAttack)
                 {
-                    Move(horizontal, attackMoveSpeed);
+                    Move(horizontal, currentAttackMoveSpeed);
                 }
                 else
                 {
-                  
                     Move(horizontal, moveSpeed);
                 }
-
             }
+            else
+            {
+                Move(0, 0);
+            }
+
             EndRoll();
         }
 
         private void Update()
         {
             _animatorStateInfo = animator.GetCurrentAnimatorStateInfo(0);
+            CheckGround();
+            //CheckKnockBack();
             PunchCombo();
             StartRoll();
         }
@@ -78,12 +105,41 @@ namespace Client
             if (Physics2D.Raycast(groundCheck.position, Vector3.down, groundDistance, groundMask))
             {
                 isGrounded = true;
+                verticalSpeed = 0;
+                bJumping = false;
+                animator.SetInteger(VerticalFlag, 0);
             }
             else
             {
                 isGrounded = false;
             }
+            
+            if (!isGrounded)
+            {
+                if (float.IsNegative(verticalSpeed))
+                {
+                    animator.SetInteger(VerticalFlag, -1);
+                }
+                else if (verticalSpeed > float.Epsilon)
+                {
+                    animator.SetInteger(VerticalFlag, 1);
+                }
+            }
+        }
 
+        private void CheckKnockBack()
+        {
+            if (bKnockback || _animatorStateInfo.IsName("Knockback"))
+            {
+                if (_animatorStateInfo.normalizedTime >= 0.8f)
+                {
+                    bKnockback = false;
+                }
+            }
+        }
+
+        private void Falling()
+        {
             if (!isGrounded)
             {
                 transform.Translate(Vector3.down * (fallSpeed * Time.deltaTime));
@@ -94,7 +150,7 @@ namespace Client
         {
             animator.SetFloat(Horizontal, Mathf.Abs(move));
             transform.position += new Vector3(move * speed * Time.deltaTime, 0, 0);
-            if (move != 0.0f)
+            if (move != 0.0f && !bAttack)
             {
                 _direction = (move > 0) ? Direction.Right : Direction.Left;
                 transform.rotation = Quaternion.Euler(0, _direction == Direction.Right ? 0 : 180, 0);
@@ -103,7 +159,7 @@ namespace Client
 
         private void StartRoll()
         {
-            if (!Input.GetKeyDown(KeyCode.Space))
+            if (!Input.GetKeyDown(KeyCode.LeftShift))
             {
                 return;
             }
@@ -128,6 +184,16 @@ namespace Client
                     _isRolling = false;
                 }
             }
+        }
+
+        private void CheckVertical()
+        {
+            // 获取当前帧的竖直方向上的位置
+            currentYPos = transform.position.y;
+            // 计算竖直方向上的速度
+            verticalSpeed = (currentYPos - lastYPos) / Time.deltaTime;
+            // 更新上一帧的位置
+            lastYPos = currentYPos;
         }
 
         private void PunchCombo()
@@ -160,6 +226,11 @@ namespace Client
                 {
                     attackCount = 3;
                     bWaitAttack = true;
+                }else if (_animatorStateInfo.IsName("Punch03") && attackCount == 3 &&
+                          _animatorStateInfo.normalizedTime < 0.8f)
+                {
+                    attackCount = 1;
+                    bWaitAttack = true;
                 }
             }
         }
@@ -185,13 +256,27 @@ namespace Client
 
         void OnReceiveHarm(GameObject receiver, GameObject sender)
         {
-            Debug.Log($"receiver: {receiver.name}, sender: {sender.name}");
             if (receiver != gameObject)
                 return;
             // var position = transform.position;
             // Vector2 direction = new Vector2((position - sender.transform.position).x, position.y);
             // direction = direction.normalized;
             transform.Translate((Vector3.left) * 1f);
+            animator.SetTrigger(knockback);
+            bKnockback = true;
+            Invoke("DelayKnockBack", 0.8f);
+        }
+
+        void OnReceiveDamage(GameObject receiver, GameObject sender)
+        {
+            if (sender != gameObject)
+                return;
+            currentAttackMoveSpeed = 0.0f;
+        }
+
+        void DelayKnockBack()
+        {
+            bKnockback = false;
         }
     }
 }
