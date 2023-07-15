@@ -19,6 +19,8 @@ namespace Client
         [FormerlySerializedAs("RollDistance")] public float rollDistance;
         [FormerlySerializedAs("RollDuration")] public float rollDuration = 0.5f;
 
+        [FormerlySerializedAs("HurtCollider")] public BoxCollider2D HurtCollider;
+
         [FormerlySerializedAs("FallSpeed")] public float fallSpeed = 5f;
         private bool isGrounded = false;
         public Transform groundCheck;
@@ -186,6 +188,7 @@ namespace Client
             _startPosition = transform.position;
             _targetPosition = _startPosition + transform.right * rollDistance;
             _rollStartTime = Time.time;
+            HurtCollider.gameObject.SetActive(false);
 
             animator.SetTrigger(Roll1);
         }
@@ -200,6 +203,7 @@ namespace Client
                 if (t >= 1.0f)
                 {
                     _isRolling = false;
+                    HurtCollider.gameObject.SetActive(true);
                 }
             }
         }
