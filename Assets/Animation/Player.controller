@@ -125,7 +125,7 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
---- !u!1102 &-7163783387978192223
+--- !u!1102 &-6569488861616945472
 AnimatorState:
   serializedVersion: 6
   m_ObjectHideFlags: 1
@@ -146,32 +146,6 @@ AnimatorState:
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
   m_Motion: {fileID: 7400000, guid: d98d9ab37d0a43c4cb0595b11c732d86, type: 2}
-  m_Tag: 
-  m_SpeedParameter: 
-  m_MirrorParameter: 
-  m_CycleOffsetParameter: 
-  m_TimeParameter: 
---- !u!1102 &-7003754974511864327
-AnimatorState:
-  serializedVersion: 6
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: Kick01
-  m_Speed: 1
-  m_CycleOffset: 0
-  m_Transitions: []
-  m_StateMachineBehaviours: []
-  m_Position: {x: 50, y: 50, z: 0}
-  m_IKOnFeet: 0
-  m_WriteDefaultValues: 1
-  m_Mirror: 0
-  m_SpeedParameterActive: 0
-  m_MirrorParameterActive: 0
-  m_CycleOffsetParameterActive: 0
-  m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 75e1386bdd553254e81e8b8bb50fb0b7, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -304,7 +278,7 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.1
+  m_TransitionDuration: 0.01
   m_TransitionOffset: 0
   m_ExitTime: 0.08865737
   m_HasExitTime: 0
@@ -385,7 +359,7 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.1
+  m_TransitionDuration: 0.01
   m_TransitionOffset: 0
   m_ExitTime: 0.3333333
   m_HasExitTime: 0
@@ -625,7 +599,7 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.1
+  m_TransitionDuration: 0.01
   m_TransitionOffset: 0
   m_ExitTime: 0.3333333
   m_HasExitTime: 0
@@ -647,49 +621,55 @@ AnimatorController:
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
+    m_Controller: {fileID: 0}
   - m_Name: Roll
     m_Type: 9
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
+    m_Controller: {fileID: 0}
   - m_Name: Normalized Time
     m_Type: 1
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
+    m_Controller: {fileID: 0}
   - m_Name: AttackCount
     m_Type: 3
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
+    m_Controller: {fileID: 0}
   - m_Name: VerticalFlag
     m_Type: 3
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
+    m_Controller: {fileID: 0}
   - m_Name: Knockback
     m_Type: 9
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
+    m_Controller: {fileID: 0}
   - m_Name: Jump
     m_Type: 9
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
+    m_Controller: {fileID: 0}
   - m_Name: DoubleJump
     m_Type: 9
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
+    m_Controller: {fileID: 0}
+  - m_Name: KickCount
+    m_Type: 3
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 0}
   m_AnimatorLayers:
   - serializedVersion: 5
     m_Name: Base Layer
@@ -882,7 +862,7 @@ AnimatorState:
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 
---- !u!1102 &3836209568482196294
+--- !u!1102 &3625547592256363841
 AnimatorState:
   serializedVersion: 6
   m_ObjectHideFlags: 1
@@ -1088,7 +1068,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Punch03
+  m_Name: Combo03
   m_Speed: 1.5
   m_CycleOffset: 0
   m_Transitions:
@@ -1193,7 +1173,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Punch01
+  m_Name: Combo01
   m_Speed: 2
   m_CycleOffset: 0
   m_Transitions:
@@ -1235,25 +1215,16 @@ AnimatorStateMachine:
     m_Position: {x: 350, y: 300, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 314403855394836638}
-    m_Position: {x: 140, y: 700, z: 0}
+    m_Position: {x: 200, y: 1060, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 3260162844516546533}
-    m_Position: {x: 170, y: 760, z: 0}
-  - serializedVersion: 1
-    m_State: {fileID: -7003754974511864327}
-    m_Position: {x: 950, y: 530, z: 0}
-  - serializedVersion: 1
-    m_State: {fileID: 3836209568482196294}
-    m_Position: {x: 1000, y: 590, z: 0}
-  - serializedVersion: 1
-    m_State: {fileID: -7163783387978192223}
-    m_Position: {x: 1060, y: 650, z: 0}
+    m_Position: {x: 230, y: 1120, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 7382500501840720874}
-    m_Position: {x: 210, y: 820, z: 0}
+    m_Position: {x: 270, y: 1180, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 9202349262231775438}
-    m_Position: {x: 250, y: 880, z: 0}
+    m_Position: {x: 310, y: 1240, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 7461846848123731817}
     m_Position: {x: -410, y: 220, z: 0}
@@ -1278,6 +1249,15 @@ AnimatorStateMachine:
   - serializedVersion: 1
     m_State: {fileID: -5316475692095554611}
     m_Position: {x: 890, y: -10, z: 0}
+  - serializedVersion: 1
+    m_State: {fileID: 9149255906392231848}
+    m_Position: {x: 912.77637, y: 714.3252, z: 0}
+  - serializedVersion: 1
+    m_State: {fileID: 3625547592256363841}
+    m_Position: {x: 922.77637, y: 724.3252, z: 0}
+  - serializedVersion: 1
+    m_State: {fileID: -6569488861616945472}
+    m_Position: {x: 932.77637, y: 734.3252, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions:
   - {fileID: -8113568568433518600}
@@ -1296,7 +1276,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Punch02
+  m_Name: Combo02
   m_Speed: 2
   m_CycleOffset: 0
   m_Transitions:
@@ -1343,6 +1323,32 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
+--- !u!1102 &9149255906392231848
+AnimatorState:
+  serializedVersion: 6
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Kick01
+  m_Speed: 1
+  m_CycleOffset: 0
+  m_Transitions: []
+  m_StateMachineBehaviours: []
+  m_Position: {x: 50, y: 50, z: 0}
+  m_IKOnFeet: 0
+  m_WriteDefaultValues: 1
+  m_Mirror: 0
+  m_SpeedParameterActive: 0
+  m_MirrorParameterActive: 0
+  m_CycleOffsetParameterActive: 0
+  m_TimeParameterActive: 0
+  m_Motion: {fileID: 7400000, guid: 75e1386bdd553254e81e8b8bb50fb0b7, type: 2}
+  m_Tag: 
+  m_SpeedParameter: 
+  m_MirrorParameter: 
+  m_CycleOffsetParameter: 
+  m_TimeParameter: 
 --- !u!1102 &9202349262231775438
 AnimatorState:
   serializedVersion: 6

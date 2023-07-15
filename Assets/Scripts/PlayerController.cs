@@ -39,9 +39,11 @@ namespace Client
 
         [FormerlySerializedAs("AttackMoveSpeed")]
         public float attackMoveSpeed = 1;
+        [FormerlySerializedAs("ComboAnimatorControllers")]
+        public List<RuntimeAnimatorController> comboAnimatorControllers;
 
         private float currentAttackMoveSpeed = 0;
-
+        private int currentComboSkillIndex = 0;
         private bool bWaitAttack = false;
         private bool bAttack = false;
         private int attackCount = 0;
@@ -179,6 +181,11 @@ namespace Client
 
         private void StartRoll()
         {
+            if (bAttack)
+            {
+                return;
+            }
+
             if (!Input.GetKeyDown(KeyCode.LeftShift))
             {
                 return;
@@ -220,35 +227,55 @@ namespace Client
 
         private void PunchCombo()
         {
-            if (Input.GetMouseButtonDown(0))
+            bool leftMouseDown = Input.GetMouseButtonDown(0);
+            bool rightMouseDown = Input.GetMouseButtonDown(1);
+            if (leftMouseDown || rightMouseDown)
             {
+                if (leftMouseDown)
+                {
+                    currentComboSkillIndex = 0;
+                }
+
+                if (rightMouseDown)
+                {
+                    currentComboSkillIndex = 1;
+                }
+
                 //若处于Idle状态，则直接打断并过渡到attack_a(攻击阶段一)
                 if (_animatorStateInfo.IsName("Idle") && attackCount == 0)
                 {
                     attackCount = 1;
+                    if (comboAnimatorControllers[currentComboSkillIndex] != animator.runtimeAnimatorController)
+                    {
+                        animator.runtimeAnimatorController = comboAnimatorControllers[currentComboSkillIndex];
+                    }
                     animator.SetInteger(AttackCount, attackCount);
                     bAttack = true;
                 }
                 else if (_animatorStateInfo.IsName("Run") && attackCount == 0)
                 {
                     attackCount = 1;
+                    if (comboAnimatorControllers[currentComboSkillIndex] != animator.runtimeAnimatorController)
+                    {
+                        animator.runtimeAnimatorController = comboAnimatorControllers[currentComboSkillIndex];
+                    }
                     animator.SetInteger(AttackCount, attackCount);
                     bAttack = true;
                 }
                 //如果当前动画处于attack_a(攻击阶段一)并且该动画播放进度小于80%，此时按下攻击键可过渡到攻击阶段二
-                else if (_animatorStateInfo.IsName("Punch01") && attackCount == 1 &&
+                else if (_animatorStateInfo.IsName("Combo01") && attackCount == 1 &&
                          _animatorStateInfo.normalizedTime < 0.8f)
                 {
                     attackCount = 2;
                     bWaitAttack = true;
                 }
                 //同上
-                else if (_animatorStateInfo.IsName("Punch02") && attackCount == 2 &&
+                else if (_animatorStateInfo.IsName("Combo02") && attackCount == 2 &&
                          _animatorStateInfo.normalizedTime < 0.8f)
                 {
                     attackCount = 3;
                     bWaitAttack = true;
-                }else if (_animatorStateInfo.IsName("Punch03") && attackCount == 3 &&
+                }else if (_animatorStateInfo.IsName("Combo03") && attackCount == 3 &&
                           _animatorStateInfo.normalizedTime < 0.8f)
                 {
                     attackCount = 1;
@@ -259,6 +286,11 @@ namespace Client
 
         void GoToNextAttackAction()
         {
+            if (comboAnimatorControllers[currentComboSkillIndex] != animator.runtimeAnimatorController)
+            {
+                animator.runtimeAnimatorController = comboAnimatorControllers[currentComboSkillIndex];
+            }
+
             animator.SetInteger(AttackCount, attackCount);
         }
 
@@ -280,14 +312,10 @@ namespace Client
         {
             if (receiver != gameObject)
                 return;
-            //var position = transform.position;
-            //Vector2 direction = new Vector2((position - sender.transform.position).x, 0f);
-            //direction = direction.normalized;
-            //Debug.Log(direction.x);
             transform.Translate((Vector3.left) * 1f);
             animator.SetTrigger(knockback);
             bKnockback = true;
-            Invoke("DelayKnockBack", 0.8f);
+            Invoke(nameof(DelayKnockBack), 0.8f);
         }
 
         void OnReceiveDamage(GameObject receiver, GameObject sender)
