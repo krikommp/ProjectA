@@ -10,6 +10,7 @@ namespace Client
     {
         private AnimatorStateInfo _animatorStateInfo;
         [FormerlySerializedAs("Animator")] public Animator animator;
+        [FormerlySerializedAs("Rigidbody2D")] public Rigidbody2D rigidbody2D;
 
         [FormerlySerializedAs("SpriteRenderer")]
         public SpriteRenderer spriteRenderer;
@@ -44,15 +45,19 @@ namespace Client
         private int attackCount = 0;
         private static readonly int AttackCount = Animator.StringToHash("AttackCount");
 
-        [FormerlySerializedAs("JumpSpeed")] public float jumpSpeed;
+        [FormerlySerializedAs("JumpForce")] public float jumpForce;
         private float lastYPos = float.MaxValue;
         private float currentYPos;
         private float verticalSpeed;
         private bool bJumping = false;
+        private bool bJumpPressed = false;
+        private int jumpCount = 2;
         private static readonly int VerticalFlag = Animator.StringToHash("VerticalFlag");
         private static readonly int knockback = Animator.StringToHash("Knockback");
 
         private bool bKnockback = false;
+        private static readonly int Jump1 = Animator.StringToHash("Jump");
+        private static readonly int DoubleJump = Animator.StringToHash("DoubleJump");
 
         private void Start()
         {
@@ -63,11 +68,10 @@ namespace Client
 
         private void FixedUpdate()
         {
-            Falling();
             CheckVertical();
             if (!_isRolling && !bKnockback)
             {
-                float horizontal = Input.GetAxis("Horizontal");
+                float horizontal = Input.GetAxisRaw("Horizontal");
 
                 if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.D))
                 {
@@ -80,6 +84,7 @@ namespace Client
                 }
                 else
                 {
+                    Jump();
                     Move(horizontal, moveSpeed);
                 }
             }
@@ -95,9 +100,9 @@ namespace Client
         {
             _animatorStateInfo = animator.GetCurrentAnimatorStateInfo(0);
             CheckGround();
-            //CheckKnockBack();
             PunchCombo();
             StartRoll();
+            ListenJump();
         }
 
         private void CheckGround()
@@ -127,29 +132,42 @@ namespace Client
             }
         }
 
-        private void CheckKnockBack()
+        private void ListenJump()
         {
-            if (bKnockback || _animatorStateInfo.IsName("Knockback"))
+            if (Input.GetKeyDown(KeyCode.Space) && jumpCount > 0)
             {
-                if (_animatorStateInfo.normalizedTime >= 0.8f)
-                {
-                    bKnockback = false;
-                }
+                bJumpPressed = true;
             }
         }
 
-        private void Falling()
+        private void Jump()
         {
-            if (!isGrounded)
+            if (isGrounded)
             {
-                transform.Translate(Vector3.down * (fallSpeed * Time.deltaTime));
+                jumpCount = 2;
+                bJumping = false;
+            }
+
+            if (bJumpPressed && isGrounded)
+            {
+                animator.SetTrigger(Jump1);
+                bJumping = true;
+                rigidbody2D.velocity = new Vector2(rigidbody2D.velocity.x, jumpForce);
+                bJumpPressed = false;
+                --jumpCount;
+            }else if (bJumpPressed && jumpCount > 0 && bJumping)
+            {
+                animator.SetTrigger(DoubleJump);
+                rigidbody2D.velocity = new Vector2(rigidbody2D.velocity.x, jumpForce);
+                --jumpCount;
+                bJumpPressed = false;
             }
         }
 
         private void Move(float move, float speed)
         {
             animator.SetFloat(Horizontal, Mathf.Abs(move));
-            transform.position += new Vector3(move * speed * Time.deltaTime, 0, 0);
+            rigidbody2D.velocity = new Vector2(move * speed, rigidbody2D.velocity.y);
             if (move != 0.0f && !bAttack)
             {
                 _direction = (move > 0) ? Direction.Right : Direction.Left;
@@ -258,9 +276,10 @@ namespace Client
         {
             if (receiver != gameObject)
                 return;
-            // var position = transform.position;
-            // Vector2 direction = new Vector2((position - sender.transform.position).x, position.y);
-            // direction = direction.normalized;
+            //var position = transform.position;
+            //Vector2 direction = new Vector2((position - sender.transform.position).x, 0f);
+            //direction = direction.normalized;
+            //Debug.Log(direction.x);
             transform.Translate((Vector3.left) * 1f);
             animator.SetTrigger(knockback);
             bKnockback = true;

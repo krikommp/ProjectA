@@ -9,13 +9,12 @@ namespace Client
         {
             var selfTopObj = gameObject.GetTopmostParent();
             var otherTopObj = other.gameObject.GetTopmostParent();
-            Debug.Log($"Self: [{selfTopObj.name}, {selfTopObj.layer.ToString()}], Other: [{other.gameObject.name}, {other.gameObject.layer.ToString()}]");
-            if (selfTopObj.CheckReceiveDamage(other.gameObject))
+            if (gameObject.CheckReceiveDamage(other.gameObject))
             {
                 Client.Event.OnReceiverDamage.Invoke(selfTopObj, otherTopObj);
             }
 
-            if (selfTopObj.CheckReceiveHarm(other.gameObject))
+            if (gameObject.CheckReceiveHarm(other.gameObject))
             {
                 Client.Event.OnReceiverHarm.Invoke(selfTopObj, otherTopObj);
             }
